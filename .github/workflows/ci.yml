@@ -35,7 +35,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build
-      run: dotnet publish --os linux --arch x64 /t:PublishContainer -p ContainerRegistry=hub.docker.com -p ContainerRepository=mpelabs.dnslookup-dev
+      run: dotnet publish --os linux --arch x64 /t:PublishContainer -p ContainerRegistry=hub.docker.com -p ContainerRepository=miiitch/mpelabs.dnslookup-dev
       working-directory: src/mpelabs.dnslookup
 
     
