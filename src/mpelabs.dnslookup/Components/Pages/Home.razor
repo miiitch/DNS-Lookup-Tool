@@ -1,0 +1,84 @@
+﻿@page "/"
+@using DnsClient
+@using DnsClient.Protocol
+@using Microsoft.FluentUI.AspNetCore.Components.Icons.Filled
+@using Size24 = Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24
+
+
+@inject DnsConfiguration DnsConfiguration;
+@inject IDialogService DialogService
+
+<PageTitle>Query</PageTitle>
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center"S>
+   <FluentBlock Style="width: 80%" HoverAnimation="true">
+      <FluentGrid>
+         <FluentGridItem xs="12" sm="6" md="7" lg="9">
+            <FluentTextField @bind-Value="@_domainName" AriaLabel="No label" style="width: 100%"
+                             Placeholder="Enter domain name">
+               <FluentIcon Value="@(new Icons.Regular.Size16.Globe())" Slot="start" Color="Color.Neutral"/>
+            </FluentTextField>
+         </FluentGridItem>
+         <FluentGridItem xs="6" sm="3" md="3"  lg="1">
+            <FluentSelect T="QueryType" Items="_queryTypes" @bind-SelectedOption="_selectedQueryType" Width="100%"
+                          OptionText="@(i => i.ToString())"
+                          OptionValue="@(i => i.ToString())"/>
+         </FluentGridItem>
+
+         <FluentGridItem xs="6" sm="3" md="2"  lg="2" Justify="JustifyContent.FlexEnd">
+            <FluentButton IconStart="@(new Size16.Search())" Disabled="@(!IsDomainValid || _loading)" Color="Color.Primary"
+                          OnClick="ProcessDomain">Run queries
+            </FluentButton>
+         </FluentGridItem>
+
+      </FluentGrid>
+   </FluentBlock>
+
+
+
+   @foreach (var dnsServer in _servers)
+   {
+      <FluentBlock Style="width: 80%" Accented="true" HoverAnimation="true">
+         <FluentStack Orientation="Orientation.Vertical">
+            @if (dnsServer.Success is false)
+            {
+               <FluentMessageBar Title="Query failed" Intent="@MessageIntent.Error" AllowDismiss="false">
+                  @dnsServer.ErrorMessage
+               </FluentMessageBar>
+            }
+            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+               <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Server())"/>
+               <FluentLabel
+                  Typo="Typography.Header">@dnsServer.DnsServerInfo.DisplayName
+               </FluentLabel>
+               @if (_loading)
+               {
+                  <FluentProgressRing Style="width: 24px">Querying...</FluentProgressRing>
+               }
+            </FluentStack>
+
+            @if (dnsServer is { Success: true, DnsResult: not null })
+            {
+               <DnsResponseComponent DnsQueryResponse="dnsServer.DnsResult.Result"/>
+               <FluentButton IconStart="@(new Size24.DocumentChevronDouble())"
+                             OnClick="async () => await ShowAuditTrail(dnsServer)">Audit trail...
+               </FluentButton>
+            }
+         </FluentStack>
+      </FluentBlock>
+   }
+
+</FluentStack>
+@*
+    display: block;
+    contain: content;
+    height: var(--card-height, 100%);
+    width: var(--card-width, 100%);
+    box-sizing: border-box;
+    background: var(--fill-color);
+    color: var(--neutral-foreground-rest);
+    border: calc(var(--stroke-width)* 1px) solid var(--neutral-stroke-layer-rest);
+    border-radius: calc(var(--layer-corner-radius)* 1px);
+    /* box-shadow: var(--elevation-shadow-card-rest);
+
+
+*@

@@ -1,0 +1,29 @@
+﻿@using DnsClient
+@using Microsoft.FluentUI.AspNetCore.Components
+@implements Microsoft.FluentUI.AspNetCore.Components.IDialogContentComponent
+
+
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Stretch">
+        <div style="scroll-behavior: smooth;height: 350px;overflow-y: scroll;">
+            @{
+                using (var sr = new StringReader(Content.AuditTrail))
+                {
+                    while (sr.ReadLine() is { } line)
+                    {
+                        <div style="font-family: monospace">@line</div>
+                    }
+                }
+            }
+        </div>
+    </FluentStack>
+</FluentDialogBody>
+
+
+@code {
+    [Parameter] public IDnsQueryResponse Content { get; set; } = null!;
+
+    [CascadingParameter] public FluentDialog? Dialog { get; set; }
+
+
+}

@@ -1,0 +1,51 @@
+.fluent-block-h-2 {
+    background-color: var(--neutral-layer-1);
+    border-radius: calc(var(--control-corner-radius)* 1px);
+    border-color: var(--neutral-layer-3);
+    border-style: solid;
+    border-width: 1px;
+    padding: calc(var(--design-unit)* 5px);
+    transition: 0.5s;
+}
+
+.fluent-block-h-2:hover {
+    background-color: var(--neutral-layer-3);
+    border-color: var(--neutral-layer-4);
+}
+
+.fluent-block-2 {
+    background-color: var(--neutral-layer-3);
+    border-color: var(--neutral-layer-4);
+    border-radius: calc(var(--control-corner-radius)* 1px);
+    border-style: solid;
+    border-width: 1px;
+    padding: calc(var(--design-unit)* 5px);
+   
+}
+
+.fluent-block-h-1 {
+    background-color: var(--neutral-layer-floating);
+    border-radius: calc(var(--control-corner-radius)* 1px);
+    border-color: var(--neutral-layer-floating);
+    border-style: solid;
+    border-width: 1px;
+    padding: calc(var(--design-unit)* 5px);
+    transition: 0.5s;
+}
+
+.fluent-block-h-1:hover {
+    background-color: var(--neutral-layer-1);
+    border-color: var(--neutral-layer-3);
+}
+
+.fluent-block-1 {
+    
+    background-color: var(--neutral-layer-1);
+    border-color: var(--neutral-layer-3);
+    border-radius: calc(var(--control-corner-radius)* 1px);
+    border-style: solid;
+    border-width: 1px;
+    padding: calc(var(--design-unit)* 5px);
+ 
+}
+

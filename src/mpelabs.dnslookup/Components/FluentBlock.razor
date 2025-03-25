@@ -1,0 +1,25 @@
+﻿<div Style="@Style" class="@(GetClassName())">
+    @ChildContent
+</div>
+
+
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    
+    [Parameter]
+    public string? Style { get; set; }
+    
+    [Parameter]
+    public bool Accented { get; set; }
+    
+    [Parameter]
+    public bool HoverAnimation { get; set; }
+
+    public string GetClassName()
+    {
+        return $"fluent-block{(HoverAnimation ? "-h" : "")}-{(Accented ? "2" : "1")}";
+    }
+    
+}
