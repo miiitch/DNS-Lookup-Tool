@@ -65,6 +65,59 @@ public class DnsServerInfo
             return Error.Unexpected(_.Message);
         }
     }
+    
+    
+    public static List<DnsServerInfo> Load(string str)
+    {
+        var parts = str.Split(':', StringSplitOptions.RemoveEmptyEntries);
+
+        if (parts.Length == 1)
+        {
+            var srvName = parts[0];
+            switch (srvName.ToLowerInvariant())
+            {
+                case "azure":
+                    return
+                    [
+                        new DnsServerInfo()
+                        {
+                            Name = "Azure DNS",
+                            ServerIpAddress = "168.63.129.16"
+                        }
+                    ];
+                case "google":
+                    return
+                    [
+                        new DnsServerInfo()
+                        {
+                            Name = "Google DNS 1",
+                            ServerIpAddress = "8.8.4.4"
+                        },
+                        new DnsServerInfo()
+                        {
+                            Name = "Google DNS 2",
+                            ServerIpAddress = "8.8.8.8"
+                        },
+                    ];
+                case "default":
+                    return [];
+            }
+        }
+
+        if (parts.Length == 2)
+        {
+            return
+            [
+                new DnsServerInfo()
+                {
+                    Name = parts[0],
+                    ServerIpAddress = parts[1]
+                }
+            ];
+        }
+
+        return [];
+    }
 }
 
 public class DnsConfiguration
@@ -74,5 +127,18 @@ public class DnsConfiguration
     public DnsConfiguration()
     {
         Servers = new List<DnsServerInfo>();
+    }
+    
+    
+
+    public static DnsConfiguration Load(string str)
+    {
+        var serverStr = str.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+        return new DnsConfiguration()
+        {
+            Servers = serverStr.SelectMany(DnsServerInfo.Load).ToList()
+        };
+
     }
 }

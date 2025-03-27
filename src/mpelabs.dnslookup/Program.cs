@@ -9,29 +9,12 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddFluentUIComponents();
 
-var test = new DnsConfiguration()
-{
-    Servers =
-    [
-        new DnsServerInfo()
-        {
-            Name = "Google 1",
-            ServerIpAddress = "8.8.4.4"
-        },
-        new DnsServerInfo()
-        {
-            Name = "Google 2",
-            ServerIpAddress = "8.8.8.8"
-        },
-        new DnsServerInfo()
-        {
-            Name = "Default Server",
-            ServerIpAddress = ""
-        }
-    ]
-};
+var dnsFromEnv = Environment.GetEnvironmentVariable("DNS_SERVERS");
+var dnsConfiguration = string.IsNullOrWhiteSpace(dnsFromEnv)
+    ? new DnsConfiguration()
+    : DnsConfiguration.Load(dnsFromEnv);
 
-builder.Services.AddSingleton(test);
+builder.Services.AddSingleton(dnsConfiguration);
 
 var app = builder.Build();
 
