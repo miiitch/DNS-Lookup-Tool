@@ -1,0 +1,18 @@
+﻿@using DnsClient
+
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Stretch">
+    <div style="font-family: monospace">@(DnsQueryResponse.Answers.Count) Answers</div>
+    @foreach (var record in DnsQueryResponse.Answers)
+    {
+        <div style="font-family: monospace">@(record.ToString())</div>
+    }
+</FluentStack>
+
+
+
+@code {
+    [Parameter] public IDnsQueryResponse DnsQueryResponse { get; set; } = null!;
+
+
+   
+}

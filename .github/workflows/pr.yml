@@ -1,0 +1,33 @@
+name: CI
+
+env:
+  DOTNET_VERSION: 8.0.x
+
+
+on:
+  pull_request:
+    types:
+      - opened
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: src
+
+    - name: Build
+      run: dotnet build --os linux --arch x64 
+      working-directory: src/mpelabs.dnslookup
+
+    
+    
