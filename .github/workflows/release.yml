@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    if: github.ref == 'refs/heads/main'
+    if:  github.event.base_ref == 'refs/heads/main'
     environment:
       name: 'prod'
     runs-on: ubuntu-latest
