@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <ContainerRepository>mpelabs.dnslookup</ContainerRepository>
+        <AssemblyVersion>0.0.0</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>

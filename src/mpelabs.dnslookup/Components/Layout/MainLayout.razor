@@ -17,6 +17,8 @@
 
 
     <FluentFooter>
+        <div>@_version</div>
+        <FluentSpacer/>
         <a href="https://github.com/miiitch/mpelabs.dnslookup" target="_blank">Project on github</a>
         <FluentSpacer/>
 
@@ -28,3 +30,15 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code
+{
+    private string _version;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        _version = typeof(Program).Assembly.GetName().Version?.ToString(3)??"";
+    }
+
+}

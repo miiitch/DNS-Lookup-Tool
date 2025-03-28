@@ -11,8 +11,7 @@ public partial class Home
     private string _domainName = "";
 
     private bool _loading = false;
-    
-    
+
 
     private List<DnsServerAndResult> _servers = new List<DnsServerAndResult>();
 
@@ -21,6 +20,7 @@ public partial class Home
         await base.OnInitializedAsync();
         _servers = DnsConfiguration.Servers.Select(x => new DnsServerAndResult(x)).ToList();
         _queryTypes = Enum.GetValues(typeof(QueryType)).Cast<QueryType>().OrderBy(_ => _.ToString()).ToList();
+     
     }
 
     public bool IsDomainValid => Uri.CheckHostName(_domainName) == UriHostNameType.Dns;
