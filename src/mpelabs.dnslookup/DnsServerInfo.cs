@@ -90,13 +90,41 @@ public class DnsServerInfo
                     [
                         new DnsServerInfo()
                         {
-                            Name = "Google DNS 1",
+                            Name = "Google Primary",
                             ServerIpAddress = "8.8.4.4"
                         },
                         new DnsServerInfo()
                         {
-                            Name = "Google DNS 2",
+                            Name = "Google Secondary",
                             ServerIpAddress = "8.8.8.8"
+                        },
+                    ];
+                case "cloudflare":
+                    return
+                    [
+                        new DnsServerInfo()
+                        {
+                            Name = "Cloudflare Primary",
+                            ServerIpAddress = "1.1.1.1"
+                        },
+                        new DnsServerInfo()
+                        {
+                            Name = "Cloudflare Secondary",
+                            ServerIpAddress = "1.0.0.1"
+                        },
+                    ];
+                case "opendns": 
+                    return
+                    [
+                        new DnsServerInfo()
+                        {
+                            Name = "OpenDNS Primary",
+                            ServerIpAddress = "208.67.222.222"
+                        },
+                        new DnsServerInfo()
+                        {
+                            Name = "OpenDNS Secondary",
+                            ServerIpAddress = "208.67.220.220"
                         },
                     ];
                 case "default":

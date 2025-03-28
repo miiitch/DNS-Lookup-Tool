@@ -8,7 +8,7 @@
         "applicationUrl": "http://localhost:5215",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
-          "DNS_SERVERS": "AZURE;GOOGLE"
+          "DNS_SERVERS": "AZURE;GOOGLE;cloudflare;opendns"
         }
       }
     }
