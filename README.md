@@ -1,4 +1,4 @@
-# mpelabs.dnslookup
+# DNS Lookup tool
 DNS Lookup Diagnostic tool embedded in a container
 
 ![Screenshot](doc\images\screencap.png)
