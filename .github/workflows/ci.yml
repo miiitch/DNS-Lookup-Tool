@@ -6,7 +6,10 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+       - main
+       - fix/**
+       - feat/**
 
 jobs:
   build:
