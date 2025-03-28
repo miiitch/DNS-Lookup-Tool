@@ -35,7 +35,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build
-      run: dotnet publish --os linux --arch x64 /t:PublishContainer -p ContainerRegistry=docker.io -p AssemblyVersion={{ github.ref_name }} -p ContainerRepository=miiitch/mpelabs.dnslookup -p ContainerImageTags=latest;{{ github.ref_name }};{{ github.sha }}
+      run: dotnet publish --os linux --arch x64 /t:PublishContainer -p ContainerRegistry=docker.io -p AssemblyVersion=$GITHUB_REF_NAME -p ContainerRepository=miiitch/mpelabs.dnslookup -p ContainerImageTags=latest;$GITHUB_REF_NAME;$GITHUB_SHA
       working-directory: src/mpelabs.dnslookup
 
     
