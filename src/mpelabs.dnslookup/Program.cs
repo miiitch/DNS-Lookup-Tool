@@ -14,7 +14,7 @@ var dnsConfiguration = string.IsNullOrWhiteSpace(dnsFromEnv)
     ? new DnsConfiguration()
     : DnsConfiguration.Load(dnsFromEnv);
 
-Console.WriteLine("{0} servers loaded from environment variable", dnsConfiguration.Servers.Count);
+Console.WriteLine($"{dnsConfiguration.Servers.Count} servers loaded from environment variable: '{dnsFromEnv}'");
 
 builder.Services.AddSingleton(dnsConfiguration);
 
@@ -25,10 +25,10 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    //app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
