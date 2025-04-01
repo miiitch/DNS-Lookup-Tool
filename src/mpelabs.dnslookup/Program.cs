@@ -14,6 +14,8 @@ var dnsConfiguration = string.IsNullOrWhiteSpace(dnsFromEnv)
     ? new DnsConfiguration()
     : DnsConfiguration.Load(dnsFromEnv);
 
+Console.WriteLine("{0} servers loaded from environment variable", dnsConfiguration.Servers.Count);
+
 builder.Services.AddSingleton(dnsConfiguration);
 
 var app = builder.Build();
@@ -29,7 +31,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseAntiforgery();
+
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
