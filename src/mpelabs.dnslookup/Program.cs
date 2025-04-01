@@ -17,7 +17,7 @@ var dnsConfiguration = string.IsNullOrWhiteSpace(dnsFromEnv)
 Console.WriteLine($"{dnsConfiguration.Servers.Count} servers loaded from environment variable: '{dnsFromEnv}'");
 
 builder.Services.AddSingleton(dnsConfiguration);
-
+builder.Services.AddAntiforgery(options => { options.Cookie.Expiration = TimeSpan.Zero;});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +34,8 @@ app.UseStaticFiles();
 
 
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode()
-    .DisableAntiforgery();
+    .DisableAntiforgery()
+    .AddInteractiveServerRenderMode();
+
 
 app.Run();
