@@ -69,7 +69,7 @@ public class DnsServerInfo
     
     public static List<DnsServerInfo> Load(string str)
     {
-        var parts = str.Split(':', StringSplitOptions.RemoveEmptyEntries);
+        var parts = str.Split('=', StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length == 1)
         {

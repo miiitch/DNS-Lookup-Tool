@@ -21,7 +21,10 @@ The documentation is here: https://learn.microsoft.com/en-us/dotnet/core/contain
 
 ### DNS Servers
 
-By default, no DNS Servers are configured. You must set a list of server from the environment variable `DNS_SERVERS`. The list must be separated by `;`.
+By default, no DNS Servers are configured. You must set a list of server either:
+* from the environment variable `DNS_SERVERS`. The list must be separated by `;`.
+* from the query string `server` in the URL. You can add multiple server statements in the query string. 
+
 
 A server is either a preconfigured set of servers or a custom server. The pre-configured servers are:
 - `google`: `8.8.8.8` & `8.8.4.4`
@@ -37,5 +40,8 @@ Exemple of configuration:
 ```
 DNS_SERVERS=google;MYSERVER=4.2.5.5
 ```
+### Customization
+
+You can add a supplemental title to the page by setting the environment variable `CUSTOMIZATION_PAGE_TITLE` to the desired title. The default title is "DNS Lookup".
 
 

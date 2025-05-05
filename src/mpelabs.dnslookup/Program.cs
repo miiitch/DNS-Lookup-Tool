@@ -17,6 +17,7 @@ var dnsConfiguration = string.IsNullOrWhiteSpace(dnsFromEnv)
 Console.WriteLine($"{dnsConfiguration.Servers.Count} servers loaded from environment variable: '{dnsFromEnv}'");
 
 builder.Services.AddSingleton(dnsConfiguration);
+builder.Services.AddSingleton<Customization>();
 builder.Services.AddAntiforgery(options => { options.Cookie.Expiration = TimeSpan.Zero;});
 var app = builder.Build();
 

@@ -1,11 +1,21 @@
 ﻿@inherits LayoutComponentBase
-
+@inject Customization Customization;
 <FluentLayout>
     <FluentHeader>
         <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
 
             <FluentIcon Value="@(new Icons.Regular.Size32.Globe())" Slot="start" Color="Color.Neutral"/>
-            <div>DNS Query</div>
+            @{
+                var pageTitle = Customization.PageTitle;
+            }
+            @if (!string.IsNullOrWhiteSpace(pageTitle))
+            {
+                <div>DNS Query - @pageTitle</div>
+            }
+            else
+            {
+                <div>DNS Query</div>
+            }
         </FluentStack>
         
     </FluentHeader>
