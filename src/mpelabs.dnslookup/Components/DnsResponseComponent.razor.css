@@ -1,0 +1,42 @@
+﻿.dns-records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.dns-records-table th {
+    text-align: left;
+    padding: 4px 10px;
+    border-bottom: 1px solid var(--neutral-stroke-layer-rest);
+    color: var(--neutral-foreground-hint);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+.dns-records-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--neutral-stroke-subtle-rest);
+    vertical-align: top;
+    font-family: "Cascadia Code", "Consolas", monospace;
+}
+.dns-records-table tr:last-child td {
+    border-bottom: none;
+}
+.dns-records-table tbody tr:hover td {
+    background: var(--neutral-fill-stealth-hover);
+}
+.dns-type-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-family: var(--body-font);
+    font-weight: 600;
+    background: var(--accent-fill-rest);
+    color: var(--foreground-on-accent-rest);
+}
+.dns-empty {
+    font-style: italic;
+    color: var(--neutral-foreground-hint);
+    padding: 8px 0;
+}

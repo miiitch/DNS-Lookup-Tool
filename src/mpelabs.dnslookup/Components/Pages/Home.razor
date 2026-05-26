@@ -2,91 +2,183 @@
 @using DnsClient
 @using DnsClient.Protocol
 @using Microsoft.FluentUI.AspNetCore.Components.Icons.Filled
+@using Size16 = Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16
 @using Size24 = Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24
-
 
 @inject DnsConfiguration DnsConfigurationFromApp;
 @inject IDialogService DialogService
 
 <PageTitle>Query</PageTitle>
-<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center" S>
-   <FluentBlock Style="width: 80%" HoverAnimation="true">
-      <FluentGrid>
-         <FluentGridItem xs="12" sm="6" md="7" lg="9">
-            <FluentTextField @bind-Value="@_domainName" AriaLabel="No label" style="width: 100%"
-                             Placeholder="Enter domain name">
-               <FluentIcon Value="@(new Icons.Regular.Size16.Globe())" Slot="start" Color="Color.Neutral"/>
-            </FluentTextField>
-         </FluentGridItem>
-         <FluentGridItem xs="6" sm="3" md="3" lg="1">
-            <FluentSelect T="QueryType" Items="_queryTypes" @bind-SelectedOption="_selectedQueryType" Width="100%"
-                          OptionText="@(i => i.ToString())"
-                          OptionValue="@(i => i.ToString())"/>
-         </FluentGridItem>
 
-         <FluentGridItem xs="6" sm="3" md="2" lg="2" Justify="JustifyContent.FlexEnd">
-            <FluentButton IconStart="@(new Size16.Search())" Disabled="@(!IsDomainValid || _loading)"
-                          Color="Color.Primary"
-                          OnClick="ProcessDomain">Run queries
-            </FluentButton>
-         </FluentGridItem>
+<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Center">
 
-      </FluentGrid>
-   </FluentBlock>
+    @* ─── Barre de recherche ─────────────────────────────────────────────── *@
+    <FluentBlock Style="width: 95%" HoverAnimation="true">
+        <FluentStack Orientation="Orientation.Vertical" Style="gap: 10px">
 
-   @if (_servers.Count == 0)
-   {
-      <FluentLabel
-         Typo="Typography.Body">No DNS servers configured. Go here to configure them: <a
-            href="https://github.com/miiitch/DNS-Lookup-Tool/blob/main/README.md#dns-servers">https://github.com/miiitch/DNS-Lookup-Tool/blob/main/README.md#dns-servers</a>
-      </FluentLabel>
-   }
+            @* Ligne principale : champ + type + bouton *@
+            <FluentGrid>
+                <FluentGridItem xs="12" sm="8" md="8" lg="9">
+                    @* Feature 2 — touche Entrée capturée sur le div parent *@
+                    <div @onkeydown="OnDomainKeyDown" style="width:100%">
+                        <FluentTextField @bind-Value="@_domainName"
+                                         AriaLabel="Domain name"
+                                         class="dns-domain-input"
+                                         Placeholder="Enter domain name (Enter to search)">
+                            <FluentIcon Value="@(new Size16.Globe())" Slot="start" Color="Color.Neutral"/>
+                        </FluentTextField>
+                    </div>
+                </FluentGridItem>
 
-   @foreach (var dnsServer in _servers)
-   {
-      <FluentBlock Style="width: 80%" Accented="true" HoverAnimation="true">
-         <FluentStack Orientation="Orientation.Vertical">
-            @if (dnsServer.Success is false)
-            {
-               <FluentMessageBar Title="Query failed" Intent="@MessageIntent.Error" AllowDismiss="false">
-                  @dnsServer.ErrorMessage
-               </FluentMessageBar>
-            }
-            <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
-               <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.Server())"/>
-               <FluentLabel
-                  Typo="Typography.Header">@dnsServer.DnsServerInfo.DisplayName
-               </FluentLabel>
-               @if (dnsServer.IsQuerying)
-               {
-                  <FluentProgressRing Style="width: 24px; margin-left: 8px;"/>
-                  <FluentLabel Typo="Typography.Body" Style="margin-left: 4px; font-style: italic;">Querying…</FluentLabel>
-               }
+                <FluentGridItem xs="6" sm="2" md="2" lg="2">
+                    <FluentSelect T="QueryType"
+                                  Items="_queryTypes"
+                                  @bind-SelectedOption="_selectedQueryType"
+                                  Width="100%"
+                                  OptionText="@(i => i.ToString())"
+                                  OptionValue="@(i => i.ToString())"/>
+                </FluentGridItem>
+
+                <FluentGridItem xs="6" sm="2" md="2" lg="1" Justify="JustifyContent.FlexEnd">
+                    <FluentButton IconStart="@(new Size16.Search())"
+                                  Disabled="@(!IsDomainValid || _loading)"
+                                  Appearance="Appearance.Accent"
+                                  Title="Run queries"
+                                  OnClick="ProcessDomain">Run queries
+                    </FluentButton>
+                </FluentGridItem>
+            </FluentGrid>
+
+            @* Feature 6 & 9 — Boutons "Recent searches" + "Add server" *@
+            <FluentStack Orientation="Orientation.Horizontal"
+                         VerticalAlignment="VerticalAlignment.Center" Style="gap: 6px">
+                @if (_history.Count > 0)
+                {
+                    <FluentButton Appearance="Appearance.Stealth"
+                                  IconStart="@(new Size16.Clock())"
+                                  OnClick="ShowHistoryDialog">
+                        Recent searches
+                    </FluentButton>
+                }
+                <FluentButton Appearance="Appearance.Stealth"
+                              IconStart="@(new Size16.Add())"
+                              OnClick="@(() => { _showAddServer = !_showAddServer; _addServerInput = ""; })">
+                    Add server
+                </FluentButton>
             </FluentStack>
 
-            @if (dnsServer is { Success: true, DnsResult: not null })
+            @if (_showAddServer)
             {
-               <DnsResponseComponent DnsQueryResponse="dnsServer.DnsResult.Result"/>
-               <FluentButton IconStart="@(new Size24.DocumentChevronDouble())"
-                             OnClick="async () => await ShowAuditTrail(dnsServer)">Audit trail...
-               </FluentButton>
+                <FluentStack Orientation="Orientation.Horizontal"
+                             VerticalAlignment="VerticalAlignment.Center" Style="gap: 6px">
+                    <div @onkeydown="OnAddServerKeyDown" style="flex:1">
+                        <FluentTextField @bind-Value="@_addServerInput"
+                                         Style="width:100%"
+                                         Placeholder="google  |  cloudflare  |  azure  |  1.2.3.4  |  MyServer=1.2.3.4"/>
+                    </div>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="AddServer">Add</FluentButton>
+                    <FluentButton OnClick="@(() => _showAddServer = false)">Cancel</FluentButton>
+                </FluentStack>
             }
-         </FluentStack>
-      </FluentBlock>
-   }
+
+        </FluentStack>
+    </FluentBlock>
+
+    @* ─── Message si aucun serveur configuré ─────────────────────────────── *@
+    @if (_servers.Count == 0)
+    {
+        <FluentLabel Typo="Typography.Body">
+            No DNS servers configured. Go here to configure them:
+            <a href="https://github.com/miiitch/DNS-Lookup-Tool/blob/main/README.md#dns-servers">README</a>
+        </FluentLabel>
+    }
+
+    @* ─── Cartes serveur ──────────────────────────────────────────────────── *@
+    @foreach (var dnsServer in _servers)
+    {
+        var cardBorder = dnsServer.IsDifferent
+            ? "border: 2px solid var(--warning-fill-rest, #f4a261);"
+            : "";
+
+        <FluentBlock Style="@($"width: 95%; {cardBorder}")" Accented="true" HoverAnimation="true">
+            <FluentStack Orientation="Orientation.Vertical" Style="gap: 6px">
+
+                @* Feature 4 — Banner d'erreur *@
+                @if (dnsServer.Success is false)
+                {
+                    <FluentMessageBar Title="Query failed" Intent="@MessageIntent.Error" AllowDismiss="false">
+                        @dnsServer.ErrorMessage
+                    </FluentMessageBar>
+                }
+
+                @* Feature 8 — Alerte comparaison *@
+                @if (dnsServer.IsDifferent)
+                {
+                    <FluentMessageBar Title="Different result" Intent="@MessageIntent.Warning" AllowDismiss="false">
+                        This server returned different records than the majority of servers.
+                    </FluentMessageBar>
+                }
+
+                @* En-tête : icône statut + nom + spinner/durée *@
+                <FluentStack Orientation="Orientation.Horizontal"
+                             VerticalAlignment="VerticalAlignment.Center" Style="gap: 6px">
+
+                    @* Feature 4 — Icône de statut *@
+                    @if (dnsServer.IsQuerying)
+                    {
+                        <FluentProgressRing Style="width:18px; height:18px; flex-shrink:0"/>
+                    }
+                    else if (dnsServer.Success == true)
+                    {
+                        <FluentIcon Value="@(new Size16.CheckmarkCircle())" Color="Color.Success"/>
+                    }
+                    else if (dnsServer.Success == false)
+                    {
+                        <FluentIcon Value="@(new Size16.DismissCircle())" Color="Color.Error"/>
+                    }
+                    else
+                    {
+                        <FluentIcon Value="@(new Size24.Server())" Color="Color.Neutral"/>
+                    }
+
+                    <FluentLabel Typo="Typography.Header">@dnsServer.DnsServerInfo.DisplayName</FluentLabel>
+
+                    @* Feature 1 — Durée de réponse *@
+                    @if (dnsServer.IsQuerying)
+                    {
+                        <FluentLabel Style="font-style:italic; color:var(--neutral-foreground-hint); font-size:0.85rem">
+                            Querying…
+                        </FluentLabel>
+                    }
+                    else if (dnsServer.DnsResult != null)
+                    {
+                        <FluentBadge Appearance="Appearance.Accent" Style="font-size:0.75rem">
+                            @($"{dnsServer.DnsResult.Duration.TotalMilliseconds:F0} ms")
+                        </FluentBadge>
+                    }
+                </FluentStack>
+
+                @* Résultats + boutons *@
+                @if (dnsServer is { Success: true, DnsResult: not null })
+                {
+                    <DnsResponseComponent DnsQueryResponse="dnsServer.DnsResult.Result"/>
+
+                    <FluentStack Orientation="Orientation.Horizontal" Style="gap: 6px; margin-top: 4px">
+                        @* Audit trail *@
+                        <FluentButton IconStart="@(new Size24.DocumentChevronDouble())"
+                                      OnClick="async () => await ShowAuditTrail(dnsServer)">
+                            Audit trail
+                        </FluentButton>
+                        @* Feature 7 — Copie *@
+                        <FluentButton IconStart="@(new Size16.Copy())"
+                                      OnClick="async () => await CopyServerResults(dnsServer)">
+                            Copy
+                        </FluentButton>
+                    </FluentStack>
+                }
+
+            </FluentStack>
+        </FluentBlock>
+    }
 
 </FluentStack>
-@*
-    display: block;
-    contain: content;
-    height: var(--card-height, 100%);
-    width: var(--card-width, 100%);
-    box-sizing: border-box;
-    background: var(--fill-color);
-    color: var(--neutral-foreground-rest);
-    border: calc(var(--stroke-width)* 1px) solid var(--neutral-stroke-layer-rest);
-    border-radius: calc(var(--layer-corner-radius)* 1px);
-    /* box-shadow: var(--elevation-shadow-card-rest);
-
-
-*@

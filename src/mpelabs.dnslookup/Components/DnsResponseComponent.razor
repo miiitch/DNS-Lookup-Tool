@@ -1,18 +1,50 @@
 ﻿@using DnsClient
+@using DnsClient.Protocol
 
-<FluentStack Orientation="Orientation.Vertical" HorizontalAlignment="HorizontalAlignment.Stretch">
-    <div style="font-family: monospace">@(DnsQueryResponse.Answers.Count) Answers</div>
-    @foreach (var record in DnsQueryResponse.Answers)
-    {
-        <div style="font-family: monospace">@(record.ToString())</div>
-    }
-</FluentStack>
-
-
+@if (!DnsQueryResponse.Answers.Any())
+{
+    <div class="dns-empty">No records found</div>
+}
+else
+{
+    <table class="dns-records-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>TTL</th>
+                <th>Type</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in DnsQueryResponse.Answers)
+            {
+                <tr>
+                    <td>@record.DomainName</td>
+                    <td>@record.TimeToLive</td>
+                    <td><span class="dns-type-badge">@record.RecordType</span></td>
+                    <td>@GetRecordValue(record)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     [Parameter] public IDnsQueryResponse DnsQueryResponse { get; set; } = null!;
 
-
-   
+    private string GetRecordValue(DnsResourceRecord record) => record switch
+    {
+        ARecord a           => a.Address.ToString(),
+        AaaaRecord aaaa     => aaaa.Address.ToString(),
+        CNameRecord cname   => cname.CanonicalName.ToString(),
+        MxRecord mx         => $"{mx.Preference}  {mx.Exchange}",
+        TxtRecord txt       => string.Join("  ", txt.EscapedText),
+        NsRecord ns         => ns.NSDName.ToString(),
+        PtrRecord ptr       => ptr.PtrDomainName.ToString(),
+        SoaRecord soa       => $"{soa.MName}  rname={soa.RName}  serial={soa.Serial}  refresh={soa.Refresh}  retry={soa.Retry}  expire={soa.Expire}  min-ttl={soa.Minimum}",
+        SrvRecord srv       => $"priority={srv.Priority}  weight={srv.Weight}  port={srv.Port}  {srv.Target}",
+        CaaRecord caa       => $"{caa.Flags}  {caa.Tag}  {caa.Value}",
+        _                   => record.ToString() ?? ""
+    };
 }

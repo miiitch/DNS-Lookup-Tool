@@ -1,0 +1,38 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+@implements Microsoft.FluentUI.AspNetCore.Components.IDialogContentComponent<List<string>>
+
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical" Style="gap: 2px; padding: 4px 0">
+        @if (Content.Count == 0)
+        {
+            <FluentLabel Style="font-style: italic; color: var(--neutral-foreground-hint); padding: 8px">
+                No search history yet.
+            </FluentLabel>
+        }
+        else
+        {
+            @foreach (var item in Content)
+            {
+                <FluentButton Appearance="Appearance.Stealth"
+                              Style="width: 100%; justify-content: flex-start; font-family: 'Cascadia Code', Consolas, monospace; font-size: 0.9rem"
+                              OnClick="@(() => Select(item))">
+                    <FluentIcon Value="@(new Icons.Regular.Size16.Globe())" Style="margin-right: 8px; flex-shrink: 0" Color="Color.Neutral"/>
+                    @item
+                </FluentButton>
+            }
+        }
+    </FluentStack>
+</FluentDialogBody>
+
+@code {
+    [Parameter] public List<string> Content { get; set; } = [];
+
+    [CascadingParameter] public FluentDialog? Dialog { get; set; }
+
+    private async Task Select(string value)
+    {
+        await Dialog!.CloseAsync(DialogResult.Ok(value));
+    }
+}
+

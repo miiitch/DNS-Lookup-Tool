@@ -128,6 +128,11 @@ code {
     color: #c02d76;
 }
 
+/* Zone de saisie du domaine agrandie */
+.dns-domain-input {
+    width: 100%;
+}
+
 @media (max-width: 600px) {
     .header-gutters {
         margin: 0.5rem 3rem 0.5rem 1.5rem !important;
