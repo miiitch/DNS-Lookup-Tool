@@ -57,9 +57,10 @@
                <FluentLabel
                   Typo="Typography.Header">@dnsServer.DnsServerInfo.DisplayName
                </FluentLabel>
-               @if (_loading)
+               @if (dnsServer.IsQuerying)
                {
-                  <FluentProgressRing Style="width: 24px">Querying...</FluentProgressRing>
+                  <FluentProgressRing Style="width: 24px; margin-left: 8px;"/>
+                  <FluentLabel Typo="Typography.Body" Style="margin-left: 4px; font-style: italic;">Querying…</FluentLabel>
                }
             </FluentStack>
 

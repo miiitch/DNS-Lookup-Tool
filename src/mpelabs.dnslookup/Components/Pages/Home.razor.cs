@@ -17,11 +17,8 @@ public partial class Home
 
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
-
-
     private DnsConfiguration _pageDnsConfiguration = new DnsConfiguration();
     private List<DnsServerAndResult> _servers = new List<DnsServerAndResult>();
-
 
     private DnsConfiguration GetConfigurationFromQuery()
     {
@@ -30,17 +27,22 @@ public partial class Home
         var result = new DnsConfiguration();
 
         var servers = queryCollection.GetValues("server") ?? [];
-
         foreach (var server in servers)
         {
             var serverConfig = DnsServerInfo.Load(server);
-
             if (serverConfig != null)
             {
                 result.Servers.AddRange(serverConfig);
             }
         }
 
+        // timeout en millisecondes (paramètre URL: ?timeout=2000)
+        if (int.TryParse(queryCollection["timeout"], out var timeout) && timeout > 0)
+            result.TimeoutMs = timeout;
+
+        // nombre de retries (paramètre URL: ?retries=1)
+        if (int.TryParse(queryCollection["retries"], out var retriesVal) && retriesVal >= 0)
+            result.Retries = retriesVal;
 
         return result;
     }
@@ -49,53 +51,68 @@ public partial class Home
     {
         await base.OnInitializedAsync();
 
-
         _pageDnsConfiguration = DnsConfigurationFromApp;
 
         var urlConfiguration = GetConfigurationFromQuery();
-        if (urlConfiguration.Servers.Count > 0)
-        {
-            _pageDnsConfiguration = _pageDnsConfiguration.Merge(urlConfiguration);    
-        }
-
-        
-
+        _pageDnsConfiguration = _pageDnsConfiguration.Merge(urlConfiguration);
 
         _servers = _pageDnsConfiguration.Servers.Select(x => new DnsServerAndResult(x)).ToList();
         _queryTypes = Enum.GetValues(typeof(QueryType)).Cast<QueryType>().OrderBy(_ => _.ToString()).ToList();
     }
 
-
     public bool IsDomainValid => Uri.CheckHostName(_domainName) == UriHostNameType.Dns;
 
     private Task DomainChanged()
     {
-        var b = IsDomainValid;
-
         return Task.CompletedTask;
     }
 
     private async Task ProcessDomain()
     {
         _loading = true;
-        this.StateHasChanged();
+
+        // Réinitialiser l'état de chaque serveur et afficher les spinners immédiatement
         foreach (var server in _servers)
         {
-            var result = await server.DnsServerInfo.Query(_domainName, _selectedQueryType);
+            server.IsQuerying = true;
+            server.Success = null;
+            server.DnsResult = null;
+            server.ErrorMessage = null;
+        }
+        StateHasChanged();
+
+        var timeoutMs = _pageDnsConfiguration.EffectiveTimeoutMs;
+        var retries = _pageDnsConfiguration.EffectiveRetries;
+
+        // Lancer toutes les requêtes en parallèle — chaque tâche met à jour l'UI dès qu'elle se termine
+        var tasks = _servers.Select(server => Task.Run(async () =>
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(timeoutMs));
+            var result = await server.DnsServerInfo.Query(
+                _domainName, _selectedQueryType, timeoutMs, retries, cts.Token);
+
+            server.IsQuerying = false;
+
             if (result.IsError)
             {
                 server.DnsResult = null;
                 server.Success = false;
                 server.ErrorMessage = result.FirstError.Description;
-                continue;
+            }
+            else
+            {
+                server.DnsResult = result.Value;
+                server.Success = true;
             }
 
-            server.DnsResult = result.Value;
-            server.Success = true;
-        }
+            // Mettre à jour l'UI dès que ce serveur a répondu
+            await InvokeAsync(StateHasChanged);
+        }));
+
+        await Task.WhenAll(tasks);
 
         _loading = false;
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
     private async Task ShowAuditTrail(DnsServerAndResult dnsServer)

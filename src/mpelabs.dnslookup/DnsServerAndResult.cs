@@ -6,11 +6,9 @@ public class DnsServerAndResult(DnsServerInfo dnsServerInfo)
 {
     public DnsServerInfo DnsServerInfo { get; } = dnsServerInfo;
     public DnsResult? DnsResult { get; set; } = null;
-    public bool? Success { get; set; }=  null;
-    
+    public bool? Success { get; set; } = null;
+    public bool IsQuerying { get; set; } = false;
     public string? ErrorMessage { get; set; } = null;
-
- 
 }
 
 public class DnsResult(IDnsQueryResponse result, TimeSpan duration)

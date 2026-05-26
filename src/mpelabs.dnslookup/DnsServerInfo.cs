@@ -9,14 +9,18 @@ namespace mpelabs.dnslookup;
 public class DnsServerInfo
 {
     public string Name { get; set; }
-
     public string ServerIpAddress { get; set; }
-    
+
     public string DisplayName => $"{Name}{(string.IsNullOrWhiteSpace(ServerIpAddress)
         ? ""
         : $" - {ServerIpAddress}")}";
 
-    public async Task<ErrorOr<DnsResult>> Query(string domainName, QueryType queryType)
+    public async Task<ErrorOr<DnsResult>> Query(
+        string domainName,
+        QueryType queryType,
+        int timeoutMs = 2000,
+        int retries = 1,
+        CancellationToken cancellationToken = default)
     {
         LookupClientOptions options;
 
@@ -28,8 +32,8 @@ public class DnsServerInfo
                 Recursion = true,
                 UseTcpFallback = false,
                 UseTcpOnly = false,
-                Retries = 5,
-                Timeout = TimeSpan.FromSeconds(5),
+                Retries = retries,
+                Timeout = TimeSpan.FromMilliseconds(timeoutMs),
                 EnableAuditTrail = true,
             };
         }
@@ -41,28 +45,35 @@ public class DnsServerInfo
                 Recursion = true,
                 UseTcpFallback = false,
                 UseTcpOnly = false,
-                Retries = 5,
-                Timeout = TimeSpan.FromSeconds(5),
+                Retries = retries,
+                Timeout = TimeSpan.FromMilliseconds(timeoutMs),
                 EnableAuditTrail = true
             };
         }
+
         var client = new LookupClient(options);
         var sw = new Stopwatch();
-        var now = DateTimeOffset.UtcNow;
         try
         {
             sw.Start();
-            var dnsQueryResponse = await client.QueryAsync(domainName, queryType);
+            var dnsQueryResponse = await client.QueryAsync(domainName, queryType, cancellationToken: cancellationToken);
             sw.Stop();
             return new DnsResult(dnsQueryResponse, sw.Elapsed);
         }
+        catch (OperationCanceledException)
+        {
+            sw.Stop();
+            return Error.Failure("Timeout", $"No response after {timeoutMs}ms");
+        }
         catch (DnsResponseException dnsException)
         {
+            sw.Stop();
             return Error.Unexpected(dnsException.DnsError);
         }
-        catch (Exception _)
+        catch (Exception ex)
         {
-            return Error.Unexpected(_.Message);
+            sw.Stop();
+            return Error.Unexpected(ex.Message);
         }
     }
     
