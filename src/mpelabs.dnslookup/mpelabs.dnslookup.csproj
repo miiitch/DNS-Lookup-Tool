@@ -8,6 +8,18 @@
         <AssemblyVersion>0.0.0</AssemblyVersion>
     </PropertyGroup>
 
+    <!-- Docker HEALTHCHECK instruction embedded in the container image built by dotnet publish /t:PublishContainer.
+         /alive is used (liveness only) so the check is fast and has no external dependencies.
+         Port 8080 is the default HTTP port for .NET 8+ SDK-published container images.
+         Azure Web App for Containers uses WEBSITE_WARMUP_PATH=/alive separately (App Service setting). -->
+    <PropertyGroup>
+        <ContainerHealthCheckCommand>wget -qO- http://localhost:8080/alive || exit 1</ContainerHealthCheckCommand>
+        <ContainerHealthCheckInterval>PT30S</ContainerHealthCheckInterval>
+        <ContainerHealthCheckTimeout>PT5S</ContainerHealthCheckTimeout>
+        <ContainerHealthCheckRetries>3</ContainerHealthCheckRetries>
+        <ContainerHealthCheckStartPeriod>PT15S</ContainerHealthCheckStartPeriod>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="DnsClient" Version="1.8.0" />
         <PackageReference Include="ErrorOr" Version="2.1.1" />
